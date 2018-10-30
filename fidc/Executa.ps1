@@ -9,8 +9,8 @@ function ExecutaPrograma {
 
     MostraLog $caminhoAbsolutoArquivoLog 'INICIANDO...';
 
-    $caminhoAbsolutoArquivoLogStdOut = $caminhoAbsolutoArquivoLog + '.stdout_' + (Get-Date | ForEach-Object {$_.ToString('yyyyMMddHHmmssfff')}) + '.txt';
-    $caminhoAbsolutoArquivoLogStdErr = $caminhoAbsolutoArquivoLog + '.stderr_' + (Get-Date | ForEach-Object {$_.ToString('yyyyMMddHHmmssfff')}) + '.txt';
+    $caminhoAbsolutoArquivoLogStdOut = $caminhoAbsolutoArquivoLog + '.stdout.txt';
+    $caminhoAbsolutoArquivoLogStdErr = $caminhoAbsolutoArquivoLog + '.stderr.txt';
 
     Start-Process -File $processFile -ArgumentList $processArgs -RedirectStandardOutput $caminhoAbsolutoArquivoLogStdOut -RedirectStandardError $caminhoAbsolutoArquivoLogStdErr -Wait -NoNewWindow;
 
@@ -34,7 +34,7 @@ function Principal {
     $caminhoAbsolutoArquivoLogTemp = BuscaValorParametro $jsonProperties 'caminhoAbsolutoDiretorioLog';
     if (Test-Path $caminhoAbsolutoArquivoLogTemp) {
         $caminhoAbsolutoArquivoLogTemp += ((Get-Item -Path $MyInvocation.ScriptName | ForEach-Object {$_.Name}) -replace '.ps1','') + '_log_';
-        $caminhoAbsolutoArquivoLogTemp += Get-Date | ForEach-Object {$_.ToString('yyyyMMdd')};
+        $caminhoAbsolutoArquivoLogTemp += Get-Date | ForEach-Object {$_.ToString('yyyyMMddHHmmssfff')};
         $caminhoAbsolutoArquivoLogTemp += '.txt'
     }
     Set-Variable -Name caminhoAbsolutoArquivoLog -Value $caminhoAbsolutoArquivoLogTemp -Option Constant;
@@ -61,8 +61,6 @@ function Principal {
     }
 
     ExecutaPrograma $caminhoAbsolutoArquivoJre @($parametrosJre);
-
-    Principal;
 }
 
 Principal;
