@@ -59,3 +59,42 @@ function ValidaDiretorio {
     }
     return $existe;
 }
+
+function ExecutaComandoSql() {
+    Param (
+        [Parameter(Mandatory=$true)][string]$Server,
+        [Parameter(Mandatory=$true)][string]$Database,
+        [Parameter(Mandatory=$true)][string]$Username,
+        [Parameter(Mandatory=$true)][string]$Password,
+        [Parameter(Mandatory=$true)][string]$Query
+    )
+    
+    #build connection string
+    $connstring = "Server=$Server; Database=$Database; User ID=$username; Password=$password;";
+    
+    #connect to database
+    $connection = New-Object System.Data.SqlClient.SqlConnection($connstring);
+    $connection.Open();
+    
+    #build query object
+    $command = $connection.CreateCommand();
+    $command.CommandText = $Query;
+    $command.CommandTimeout = $CommandTimeout;
+    
+    #run query
+    $adapter = New-Object System.Data.SqlClient.SqlDataAdapter $command;
+    $dataset = New-Object System.Data.DataSet;
+    $adapter.Fill($dataset) | Out-Null;
+    
+    #return the first collection of results or an empty array
+    If ($null -ne $dataset.Tables[0]) {
+        $table = $dataset.Tables[0];
+    } Else {
+        If ($table.Rows.Count -eq 0) {
+            $table = New-Object System.Collections.ArrayList;
+        }
+    }
+    
+    $connection.Close();
+    return $table;
+}
