@@ -1,8 +1,8 @@
 function MostraLog
 {
     Param (
-        [string] $caminhoAbsolutoArquivoLog,
-        [string] $log,
+        [Parameter(Mandatory=$true)][string] $caminhoAbsolutoArquivoLog,
+        [Parameter(Mandatory=$true)][string] $log,
         [bool] $ocultaTimeStamp
     )
     if (!$ocultaTimeStamp) {$logFinal = '[' + (Get-Date | ForEach-Object {$_.ToString('yyyy-MM-ddTHH:mm:ss.fff')}) + '] '};
@@ -97,4 +97,16 @@ function ExecutaComandoSql() {
     
     $connection.Close();
     return $table;
+}
+
+function PostSlack {
+    param (
+        [Parameter(Mandatory=$true)][string]$text,
+        [Parameter(Mandatory=$true)][string]$channel
+    )
+
+    $url = 'https://hooks.slack.com/services/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'
+    $body = '{"text": "' + $text + '", "channel": "#' + $channel + '"}'
+    return Invoke-RestMethod -Method 'Post' -Uri $url -Body $body;
+    
 }
