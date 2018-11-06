@@ -92,6 +92,7 @@ function Principal {
     Remove-Variable -Name 'diretoriosEnviados' -Force -ErrorAction 'SilentlyContinue';
     Remove-Variable -Name 'disponibilizacaoSftpRendimento' -Force -ErrorAction 'SilentlyContinue';
     Remove-Variable -Name 'scriptIdVersaoVan' -Force -ErrorAction 'SilentlyContinue';
+    Remove-Variable -Name 'idsEnvioAccesstageUnha' -Force -ErrorAction 'SilentlyContinue';
     Remove-Variable -Name 'sqlServer' -Force -ErrorAction 'SilentlyContinue';
     Remove-Variable -Name 'sqlDatabase' -Force -ErrorAction 'SilentlyContinue';
     Remove-Variable -Name 'sqlUsername' -Force -ErrorAction 'SilentlyContinue';
@@ -112,6 +113,7 @@ function Principal {
     Set-Variable -Name 'diretoriosEnviados' -Value (BuscaValorParametro $jsonProperties 'diretoriosEnviados') -Option ReadOnly;
     Set-Variable -Name 'disponibilizacaoSftpRendimento' -Value (BuscaValorParametro $jsonProperties 'disponibilizacaoSftpRendimento') -Option ReadOnly;
     Set-Variable -Name 'scriptIdVersaoVan' -Value (BuscaValorParametro $jsonProperties 'scriptIdVersaoVan') -Option ReadOnly;
+    Set-Variable -Name 'idsEnvioAccesstageUnha' -Value (BuscaValorParametro $jsonProperties 'idsEnvioAccesstageUnha') -Option ReadOnly;
     Set-Variable -Name 'sqlServer' -Value (BuscaValorParametro $jsonProperties 'sqlServer') -Option ReadOnly;
     Set-Variable -Name 'sqlDatabase' -Value (BuscaValorParametro $jsonProperties 'sqlDatabase') -Option ReadOnly;
     Set-Variable -Name 'sqlUsername' -Value (BuscaValorParametro $jsonProperties 'sqlUsername') -Option ReadOnly;
@@ -175,6 +177,13 @@ function Principal {
         $jsonResults = $dataRowResults | Select-Object * -ExcludeProperty ItemArray, Table, RowError, RowState, HasErrors | ConvertTo-Json | ConvertFrom-Json;
     }
 
+    try {
+        $jsonIdsEnvioAccesstageUnha = ConvertFrom-Json -InputObject $idsEnvioAccesstageUnha
+    } catch [Exception] {
+        MostraLog $caminhoAbsolutoArquivoLog ('idsEnvioAccesstageUnha: ' + $_.Exception.GetType().FullName + ' - ' + $_.Exception.Message);
+        $podeMandarVer = $false;
+    }
+
     if (!$podeMandarVer) {
         return
     }
@@ -189,6 +198,17 @@ function Principal {
             $posicao += 1;
         }
 
+    }
+
+    foreach ($jsonIdEnvioAccesstageUnha in $jsonIdsEnvioAccesstageUnha) {
+        $posicao = 0;
+        foreach ($diretorioBusca in $jsonDiretoriosBusca.diretorio) {
+            $diretorioEnviados = $jsonDiretoriosEnviados.diretorio[$posicao];
+
+            PegaArquivos $diretorioBusca $diretorioEnviados ('PAGS*_' + $jsonIdEnvioAccesstageUnha.cliente_id + '_*.txt');
+
+            $posicao += 1;
+        }
     }
 
     Principal;
